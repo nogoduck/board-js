@@ -46,7 +46,7 @@ router.post("/update", (req, res) => {
   });
 });
 
-router.post("/", (req, res) => {
+router.post("/getAll", (req, res) => {
   Board.find()
     .sort({ createdAt: "desc" })
     .then((board) => {

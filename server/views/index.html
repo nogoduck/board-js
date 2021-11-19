@@ -1,55 +1,153 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../public/index.css" />
-    <link
-      rel="stylesheet"
-      href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-      integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
-      crossorigin="anonymous"
-    />
-    <title>도서 도우미</title>
-  </head>
-  <body>
+    <title>undefined</title>
+</head>
+<body>
+    
     <!-- Header -->
     <header>
-      <i class="fas fa-book"></i>
-      <div class="title">도서 도우미</div>
+        <div id="title">undefined</div>
     </header>
     <!-- End Header -->
 
-    <!-- Search Section -->
-    <section id="search">
-      <form action="/search" method="GET">
-        <div class="selectBox">
-          <select class="selectList" name="option">
-            <option>도서명</option>
-            <option>저자명</option>
-            <option>출판사</option>
-          </select>
-          <i class="fas fa-caret-down"></i>
-        </div>
-        <input
-          type="text"
-          name="keyword"
-          placeholder="키워드를 입력하세요."
-          autofocus
-        />
-        <input type="hidden" name="page" value="1" />
-        <button type="submit">
-          <i class="fas fa-search"></i>
-        </button>
-      </form>
+    <!-- Login Section -->
+    <section id="login">
+
     </section>
-    <!-- End Search Section -->
+    <button onclick="onClickLoginButton()">로그인</button>
+    <button onclick="onClickRegisterButton()">회원가입</button>
+
+    <!-- End Login Section -->
+    
+        <div>3001</div>
+    <!-- Board Section -->
+    <section id="board">
+
+
+
+        <div id="board-write">
+            <button onClick=>글쓰기</button>
+        </div>
+    </section>
+    <!-- End Board Section -->
+        <tr onclick="test()">
+            <td>123</td>
+            <td>123</td>
+            <td>123</td>
+        </tr>
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-      const header = document.querySelector("header");
-      header.addEventListener("click", () => {
-        location.href = "/";
-      });
+        const header = document.querySelector("header");
+        const board = document.querySelector("#board");
+        const login = document.querySelector("#login");
+
+        header.addEventListener("click", () => {
+            location.href = "/";
+        });
+
+
+        const onClickLoginButton = () => {
+            login.innerHTML = `
+             <form>
+                <input type="text" id="login_id" placeholder="id">
+                <input type="password" id="login_password" placeholder="password">
+                <button type="button" onclick="onSubmitLogin()">로그인</button>
+                </form>`;
+
+            console.log("login >> ", login);
+        }
+
+        const onClickRegisterButton = () => {
+            login.innerHTML = `
+             <form>
+        <input type="text" id="register_nickname" placeholder="nickname">
+        <input type="text" id="register_id" placeholder="id">
+        <input type="password" id="register_password" placeholder="password">
+                <button type="button" onclick="onSubmitRegister()">회원가입</button>
+
+
+    </form>`;
+        }
+
+        const onSubmitLogin = () => {
+            const id = document.querySelector("#login_id").value;
+            const password = document.querySelector("#login_password").value;
+            console.log("login id ,password >> ", id, password);
+            const payload = { id, password };
+            axios.post("/api/user/login", payload)
+                .then(({data}) => {
+                    console.log(data);
+                })
+                .catch((err) => {
+                    console.error(err);
+                })
+        }
+
+        const onSubmitRegister = () => {
+            const nickname = document.querySelector("#register_nickname").value;
+            const id = document.querySelector("#register_id").value;
+            const password = document.querySelector("#register_password").value;
+            console.log("login nickname, id ,password >> ", nickname, id, password);
+            const payload = { nickname, id, password };
+            console.log(paylaod);
+            axios.post("/api/user/register", payload)
+                .then(({data}) => {
+                    console.log(data);
+                })
+                .catch((err) => {
+                    console.error(err);
+                })
+        }
+
+        const onClickDetailPage = (e) => {
+            const target = e.querySelector("#hidden").innerText;
+            console.log("target >> ", target);
+            const payload = {
+                _id: target,
+            };
+
+            axios.post("/api/board/detail", payload)
+                .then(({data}) => {
+                    console.log(data);
+                })
+                .catch((err) => {
+                    console.error(err);
+                })
+        };
+
+        const init = () => {
+            axios
+                .post("/api/board/getAll")
+                .then((res) => {
+                    const data = res.data;
+                    console.log("data >> ", data);
+                    let html = "<Table>";
+                    data.board.map((v) => {
+                        html += `
+                                <tr onclick="onClickDetailPage(this)">
+                                    <td id="hidden">${v._id}</td>
+                                    <td class="board-title">${v.title}</td>
+                                    <td>${v.createdAt}</td>
+                                 </tr>
+                                `;
+                    });
+                    html += "</Table>";
+                    board.innerHTML = html;
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        };
+
+        init();
+
     </script>
-  </body>
+</body>
 </html>

@@ -5,6 +5,7 @@ const { auth } = require("../middleware/auth");
 
 router.post("/register", (req, res) => {
   const user = new User(req.body);
+  console.log("user >> ", user);
   user.save((err, user) => {
     console.log("[ Server ] register user >> ", user);
     if (err) return res.json({ success: false, err });

@@ -14,6 +14,7 @@ const userRouter = require("./routes/user");
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "/")));
 app.use(express.static(path.join(__dirname, "/views")));
 app.use(express.urlencoded({ extended: false }));
 app.set("PORT", process.env.PORT || 5005);
