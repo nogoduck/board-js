@@ -1,3 +1,4 @@
+const config = require('./config/dev');
 const nunjucks = require("nunjucks");
 const mongoose = require('mongoose');
 const express = require("express");
@@ -13,7 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "/")));
-app.set("port", process.env.PORT || 8004);
+app.set("PORT", process.env.PORT || 8004);
 app.set("view engine", "html");
 
 nunjucks.configure("views", {
@@ -22,12 +23,7 @@ nunjucks.configure("views", {
 });
 
 mongoose
-    .connect(config.mongoURI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false,
-    })
+    .connect(config.mongoURI)
     .then(() => {
         console.log('MongoDB Connected...');
     })
@@ -36,8 +32,10 @@ mongoose
 
 
 
+
+
 app.use("/", indexRouter);
 
-app.listen(app.get('port'), () => {
-    console.log(app.get('port'), '번 포트에서 대기중');
+app.listen(app.get('PORT'), () => {
+    console.log("Connected PORT:", app.get('PORT'));
 });
