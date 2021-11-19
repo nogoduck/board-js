@@ -26,7 +26,7 @@
     <!-- Board Section -->
     <section id="board">
     </section>
-    <button onClick=>글쓰기</button>
+    <button onclick="onClickBoardWrite()">글쓰기</button>
     <div id="board-write"></div>
     <!-- End Board Section -->
 
@@ -36,6 +36,7 @@
         const board = document.querySelector("#board");
         const login = document.querySelector("#login");
         const authBtn = document.querySelector("#auth_btn");
+        let postId = null;
         const user = {
             _id: null,
             nickname: null,
@@ -46,12 +47,126 @@
             location.href = "/";
         });
 
+        ///////////////////////////////////
+        //             게시판
+        ///////////////////////////////////
+        const onClickBoardWrite = () => {
+            if (!user.isAuth) {
+                alert("로그인된 유저만 글을 작성할 수 있습니다.");
+                return;
+            }
+            board.innerHTML = `
+            <form>
+                <h3>작성자: ${user.nickname}</h3>
+                <input type="text" id="board_title" placeholder="title"><br>
+                <textarea id="board_description" placeholder="description"></textarea><br>
+                <button type="button" onclick="onSubmitBoardWrite()">완료</button>
+            </form>
+
+            `;
+        };
+
+        const onSubmitBoardWrite = () => {
+            const _id = user._id;
+            const title = document.querySelector("#board_title").value;
+            const description = document.querySelector("#board_description").value;
+            const payload = { writer: _id, title, description };
+            axios
+                .post("/api/board/create", payload)
+                .then(({ data }) => {
+                    console.log("write data >> ", data);
+                    // if (data.success) {
+                        alert("작성글이 성공적으로 등록되었습니다.");
+                        onShowBoardList();
+                    // } else {
+                    //     alert("글 등록 실패");
+                    // }
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        };
+
+        const onClickDeletePost = () => {
+            axios
+                .post("/api/board/delete", { postId })
+                .then(({ data }) => {
+                    console.log("del data >> ", data);
+                    // if (data.success) {
+                        alert("게시글이 성공적으로 삭제되었습니다.");
+                    // }
+                    onShowBoardList();
+
+                })
+                .catch((err) => {
+                    console.error(err);
+                    // alert("게시글을 삭제하는데 실패했습니다.");
+                    onShowBoardList();
+
+                });
+        };
+
+        const onClickDetailPage = (e) => {
+            postId = e.querySelector("#hidden").innerText;
+            console.log("postId >> ", postId);
+            const payload = {
+                _id: postId,
+            };
+            axios
+                .post("/api/board/detail", payload)
+                .then(({ data }) => {
+                    console.log("detail data >> ", data);
+
+                    if (data.doc) {
+                        board.innerHTML = `
+                            ${data.doc.title} <br/>
+                            ${data.doc.description} <br/>
+                            <button type="button" onclick="onClickDeletePost()">삭제하기</button>
+                        `;
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        };
+
+        const onShowBoardList = () => {
+            axios
+                .post("/api/board/getAll")
+                .then(({ data }) => {
+                    console.log("board data >> ", data);
+                    let html;
+                    if (data.board.length === 0) {
+                        html = "<h2>불러올 글이 없습니다.</h2>";
+                    } else {
+                        html = "<Table>";
+                        data.board.map((v) => {
+                            html += `
+                                    <tr onclick="onClickDetailPage(this)">
+                                        <td id="hidden">${v._id}</td>
+                                        <td class="board-title">${v.title}</td>
+                                        <td>${v.createdAt}</td>
+                                     </tr>
+                                    `;
+                        });
+                        html += "</Table>";
+                    }
+                    board.innerHTML = html;
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        };
+
+        ///////////////////////////////////
+        //             로그인
+        ///////////////////////////////////
         const onClickLoginButton = () => {
             login.innerHTML = `
              <form>
-                <input type="text" id="login_id" placeholder="id">
-                <input type="password" id="login_password" placeholder="password">
-                <button type="button" onclick="onSubmitLogin()">로그인</button>
+                <input type="text" id="login_id" placeholder="id"><br>
+                <input type="password" id="login_password" placeholder="password"><br>
+                <button type="button" onclick="onSubmitLogin()">로그인 완료</button>
                 </form>`;
 
             console.log("login >> ", login);
@@ -60,10 +175,10 @@
         const onClickRegisterButton = () => {
             login.innerHTML = `
              <form>
-                <input type="text" id="register_nickname" placeholder="nickname">
-                <input type="text" id="register_id" placeholder="id">
-                <input type="password" id="register_password" placeholder="password">
-                <button type="button" onclick="onSubmitRegister()">회원가입</button>
+                <input type="text" id="register_nickname" placeholder="nickname"><br>
+                <input type="text" id="register_id" placeholder="id"><br>
+                <input type="password" id="register_password" placeholder="password"><br>
+                <button type="button" onclick="onSubmitRegister()">회원가입 완료</button>
             </form>`;
         };
 
@@ -71,9 +186,8 @@
             const id = document.querySelector("#login_id").value;
             const password = document.querySelector("#login_password").value;
             console.log("login id ,password >> ", id, password);
-            const payload = { id, password };
             axios
-                .post("/api/user/login", payload)
+                .post("/api/user/login", { id, password })
                 .then(({ data }) => {
                     if (data.loginSuccess) {
                         initUser(data.userId, data.nickname, true);
@@ -97,7 +211,7 @@
                 .post("/api/user/register", payload)
                 .then(({ data }) => {
                     console.log("data >> ", data);
-                    if(data.success){
+                    if (data.success) {
                         alert("회원가입 완료");
                         onClickLoginButton();
                     }
@@ -108,14 +222,12 @@
         };
 
         const onSubmitLogout = () => {
-            const payload = { _id: user._id };
-            console.log("payload >> ", payload);
             axios
-                .get("/api/user/logout", payload)
+                .get("/api/user/logout", { _id: user._id })
                 .then(({ data }) => {
                     if (data.success) {
-                        onClickLoginButton();
                         initUser();
+                        onClickLoginButton();
                     } else {
                         console.log("logout failed...");
                     }
@@ -126,17 +238,17 @@
                 });
         };
 
-        const onClickDetailPage = (e) => {
-            const target = e.querySelector("#hidden").innerText;
-            console.log("target >> ", target);
-            const payload = {
-                _id: target,
-            };
-
+        const getAuth = () => {
             axios
-                .post("/api/board/detail", payload)
+                .get("/api/user/auth")
                 .then(({ data }) => {
-                    console.log(data);
+                    console.log("data >> ", data);
+                    if (data.isAuth) {
+                        initUser(data._id, data.nickname, true);
+                        onShowLogoutButton();
+                    } else {
+                        initUser();
+                    }
                 })
                 .catch((err) => {
                     console.error(err);
@@ -145,7 +257,7 @@
 
         const onShowLogoutButton = () => {
             login.innerHTML = `
-                          <h2>${user.nickname}</h2>
+                          <h2>${user.nickname}</h2><br>
                           <button type="button" onclick="onSubmitLogout()">로그아웃</button>
                         `;
             authBtn.innerHTML = "";
@@ -161,44 +273,13 @@
             console.log("user >> ", user);
         };
 
+        //초기화(로그인 상태, 게시판 글 요청)
         const init = () => {
-            axios
-                .post("/api/board/getAll")
-                .then(({ data }) => {
-                    console.log("data >> ", data);
-                    let html = "<Table>";
-                    data.board.map((v) => {
-                        html += `
-                                <tr onclick="onClickDetailPage(this)">
-                                    <td id="hidden">${v._id}</td>
-                                    <td class="board-title">${v.title}</td>
-                                    <td>${v.createdAt}</td>
-                                 </tr>
-                                `;
-                    });
-                    html += "</Table>";
-                    board.innerHTML = html;
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-            axios
-                .get("/api/user/auth")
-                .then(({ data }) => {
-                    console.log("data >> ", data);
-                    if (data.isAuth) {
-                        onShowLogoutButton();
-                    } else {
-                        initUser();
-                    }
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
+            getAuth();
+            // onShowBoardList();
         };
 
         init();
-
     </script>
 </body>
 </html>

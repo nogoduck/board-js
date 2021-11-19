@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const BoardSchema = new mongoose.Schema(
   {
     writer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     title: {
       type: String,
@@ -20,6 +20,6 @@ const BoardSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-const Board = mongoose.model('Board', BoardSchema);
+const Board = mongoose.model("Board", BoardSchema);
 
 module.exports = { Board };

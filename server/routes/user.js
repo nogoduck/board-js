@@ -35,14 +35,11 @@ router.post("/login", (req, res) => {
 
       user.generateToken((err, user) => {
         if (err) return res.status(400).send(err);
-        res
-          .cookie("x_auth", user.token)
-          .status(200)
-          .json({
-            loginSuccess: true,
-            userId: user._id,
-            nickname: user.nickname,
-          });
+        res.cookie("x_auth", user.token).status(200).json({
+          loginSuccess: true,
+          userId: user._id,
+          nickname: user.nickname,
+        });
       });
     });
   });
@@ -51,7 +48,7 @@ router.post("/login", (req, res) => {
 router.get("/auth", auth, (req, res) => {
   res.status(200).json({
     _id: req.user._id,
-    name: req.user.name,
+    nickname: req.user.nickname,
     isAuth: true,
   });
 });
