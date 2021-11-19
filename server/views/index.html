@@ -8,7 +8,6 @@
     <title>undefined</title>
 </head>
 <body>
-    
     <!-- Header -->
     <header>
         <div id="title">undefined</div>
@@ -17,41 +16,35 @@
 
     <!-- Login Section -->
     <section id="login">
-
     </section>
-    <button onclick="onClickLoginButton()">로그인</button>
-    <button onclick="onClickRegisterButton()">회원가입</button>
-
+    <div id="auth_btn">
+        <button onclick="onClickLoginButton()">로그인</button>
+        <button onclick="onClickRegisterButton()">회원가입</button>
+    </div>
     <!-- End Login Section -->
 
     <!-- Board Section -->
     <section id="board">
-
-
-
     </section>
     <button onClick=>글쓰기</button>
     <div id="board-write"></div>
     <!-- End Board Section -->
-
-
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         const header = document.querySelector("header");
         const board = document.querySelector("#board");
         const login = document.querySelector("#login");
-
+        const authBtn = document.querySelector("#auth_btn");
         const user = {
-            _id : null,
-            nickname : null,
-            isAuth : false,
-        }
+            _id: null,
+            nickname: null,
+            isAuth: false,
+        };
 
         header.addEventListener("click", () => {
             location.href = "/";
         });
-
 
         const onClickLoginButton = () => {
             login.innerHTML = `
@@ -62,7 +55,7 @@
                 </form>`;
 
             console.log("login >> ", login);
-        }
+        };
 
         const onClickRegisterButton = () => {
             login.innerHTML = `
@@ -72,26 +65,26 @@
                 <input type="password" id="register_password" placeholder="password">
                 <button type="button" onclick="onSubmitRegister()">회원가입</button>
             </form>`;
-        }
+        };
 
         const onSubmitLogin = () => {
             const id = document.querySelector("#login_id").value;
             const password = document.querySelector("#login_password").value;
             console.log("login id ,password >> ", id, password);
             const payload = { id, password };
-            axios.post("/api/user/login", payload)
-                .then(({data}) => {
-                    if(data.loginSuccess){
-                        initUser(data.userId, user.nickname, true);
+            axios
+                .post("/api/user/login", payload)
+                .then(({ data }) => {
+                    if (data.loginSuccess) {
+                        initUser(data.userId, data.nickname, true);
                         onShowLogoutButton();
                     }
-
-                    console.log(data);
+                    printUserInfo();
                 })
                 .catch((err) => {
                     console.error(err);
-                })
-        }
+                });
+        };
 
         const onSubmitRegister = () => {
             const nickname = document.querySelector("#register_nickname").value;
@@ -100,33 +93,38 @@
             console.log("login nickname, id ,password >> ", nickname, id, password);
             const payload = { nickname, id, password };
             console.log("payload >> ", payload);
-            axios.post("/api/user/register", payload)
-                .then(({data}) => {
-                    console.log(data);
+            axios
+                .post("/api/user/register", payload)
+                .then(({ data }) => {
+                    console.log("data >> ", data);
+                    if(data.success){
+                        alert("회원가입 완료");
+                        onClickLoginButton();
+                    }
                 })
                 .catch((err) => {
                     console.error(err);
-                })
-        }
+                });
+        };
 
         const onSubmitLogout = () => {
-            const payload = { _id : user._id };
+            const payload = { _id: user._id };
             console.log("payload >> ", payload);
-            axios.get("/api/user/logout", payload)
-                .then(({data}) => {
-                    if(data.success){
+            axios
+                .get("/api/user/logout", payload)
+                .then(({ data }) => {
+                    if (data.success) {
                         onClickLoginButton();
                         initUser();
                     } else {
                         console.log("logout failed...");
                     }
+                    printUserInfo();
                 })
                 .catch((err) => {
                     console.error(err);
-                })
-        }
-
-
+                });
+        };
 
         const onClickDetailPage = (e) => {
             const target = e.querySelector("#hidden").innerText;
@@ -135,31 +133,38 @@
                 _id: target,
             };
 
-            axios.post("/api/board/detail", payload)
-                .then(({data}) => {
+            axios
+                .post("/api/board/detail", payload)
+                .then(({ data }) => {
                     console.log(data);
                 })
                 .catch((err) => {
                     console.error(err);
-                })
+                });
         };
 
         const onShowLogoutButton = () => {
             login.innerHTML = `
-                            <button type="button" onclick="onSubmitLogout()">로그아웃</button>
+                          <h2>${user.nickname}</h2>
+                          <button type="button" onclick="onSubmitLogout()">로그아웃</button>
                         `;
-        }
+            authBtn.innerHTML = "";
+        };
 
         const initUser = (id = null, nickname = null, isAuth = false) => {
             user._id = id;
             user.nickname = nickname;
             user.isAuth = isAuth;
-        }
+        };
+
+        const printUserInfo = () => {
+            console.log("user >> ", user);
+        };
 
         const init = () => {
             axios
                 .post("/api/board/getAll")
-                .then(({data}) => {
+                .then(({ data }) => {
                     console.log("data >> ", data);
                     let html = "<Table>";
                     data.board.map((v) => {
@@ -179,9 +184,9 @@
                 });
             axios
                 .get("/api/user/auth")
-                .then(({data}) => {
+                .then(({ data }) => {
                     console.log("data >> ", data);
-                    if(data.isAuth){
+                    if (data.isAuth) {
                         onShowLogoutButton();
                     } else {
                         initUser();
@@ -194,7 +199,6 @@
 
         init();
 
-        console.log("user >> ", user);
     </script>
 </body>
 </html>
