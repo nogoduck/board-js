@@ -14,7 +14,7 @@ const userRouter = require("./routes/user");
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "/")));
+app.use(express.static(path.join(__dirname, "/views")));
 app.use(express.urlencoded({ extended: false }));
 app.set("PORT", process.env.PORT || 5005);
 app.set("view engine", "html");
@@ -24,13 +24,9 @@ nunjucks.configure("views", {
   watch: true,
 });
 
-app.get("/", (req, res) => {
-  res.render("index");
-});
-
-// app.use("/", indexRouter);
-// app.use("/api/board", boardRouter);
-// app.use("/api/user", userRouter);
+app.use("/", indexRouter);
+app.use("/api/board", boardRouter);
+app.use("/api/user", userRouter);
 
 mongoose
   .connect(config.mongoURI)
