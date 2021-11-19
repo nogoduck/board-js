@@ -6,9 +6,14 @@ const { Board } = require("../models/Board");
 
 router.post("/delete", (req, res) => {
   const target = req.body;
-  console.log("target Id :: ", target);
+  console.log("[ Server ] delete target >> ", target);
+  if (Object.keys(target).length === 0) {
+    return res.status(500).json({
+      message: "The target to be removed has not been entered",
+    });
+  }
   Board.findOneAndDelete(target, (err, doc) => {
-    console.log("삭제 결과: ", doc);
+    console.log("[ Server ] delete doc >> ", doc);
     if (err)
       return res.status(500).json({
         message: err,
@@ -32,7 +37,7 @@ router.post("/update", (req, res) => {
     updatedAt: getDate(),
   };
   Board.findOneAndUpdate(filter, update, { new: true }, (err, doc) => {
-    console.log("doc:: ", doc);
+    console.log("[ Server ] update doc >> ", doc);
     if (err)
       return res.status(500).json({
         message: err,
@@ -44,26 +49,9 @@ router.post("/update", (req, res) => {
   });
 });
 
-router.post("/totalcount", (req, res) => {
-  Board.count((err, count) => {
-    if (err) {
-      console.log(err);
-    }
-    res.status(200).json({
-      total: count,
-    });
-  });
-});
-
 router.post("/", (req, res) => {
-  console.log("요청");
-  const skipCount = req.body.currentPage;
-  const limitCount = 10;
-
   Board.find()
     .sort({ createdAt: "desc" })
-    .skip(skipCount)
-    .limit(limitCount)
     .then((board) => {
       return res.status(200).json({
         board,
@@ -78,25 +66,21 @@ router.post("/", (req, res) => {
 
 router.post("/create", (req, res) => {
   const board = new Board(req.body);
-  console.log("board :: ", board);
-
   board.save((err, data) => {
     if (err) return res.json({ success: false, err });
-    console.log("save data: ", data);
+    console.log("[ Server ] create data >> ", data);
     return res.status(200).json({
       success: true,
-      message: "게시물 업로드 성공",
+      message: "You uploaded the post successfully",
     });
   });
 });
 
 router.post("/detail", (req, res) => {
-  console.log(req.body);
   Board.findOne(req.body)
     .populate("writer")
     .exec((err, doc) => {
-      console.log("유저 찾음", doc);
-
+      console.log("[ Server ] detail doc >> ", doc);
       if (err) return res.status(500).json({ message: err });
       return res.status(200).json({ doc });
     });
