@@ -23,23 +23,17 @@
     <button onclick="onClickRegisterButton()">회원가입</button>
 
     <!-- End Login Section -->
-    
-        <div>3001</div>
+
     <!-- Board Section -->
     <section id="board">
 
 
 
-        <div id="board-write">
-            <button onClick=>글쓰기</button>
-        </div>
     </section>
+    <button onClick=>글쓰기</button>
+    <div id="board-write"></div>
     <!-- End Board Section -->
-        <tr onclick="test()">
-            <td>123</td>
-            <td>123</td>
-            <td>123</td>
-        </tr>
+
 
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -47,6 +41,12 @@
         const header = document.querySelector("header");
         const board = document.querySelector("#board");
         const login = document.querySelector("#login");
+
+        const user = {
+            _id : null,
+            nickname : null,
+            isAuth : false,
+        }
 
         header.addEventListener("click", () => {
             location.href = "/";
@@ -67,13 +67,11 @@
         const onClickRegisterButton = () => {
             login.innerHTML = `
              <form>
-        <input type="text" id="register_nickname" placeholder="nickname">
-        <input type="text" id="register_id" placeholder="id">
-        <input type="password" id="register_password" placeholder="password">
+                <input type="text" id="register_nickname" placeholder="nickname">
+                <input type="text" id="register_id" placeholder="id">
+                <input type="password" id="register_password" placeholder="password">
                 <button type="button" onclick="onSubmitRegister()">회원가입</button>
-
-
-    </form>`;
+            </form>`;
         }
 
         const onSubmitLogin = () => {
@@ -83,6 +81,11 @@
             const payload = { id, password };
             axios.post("/api/user/login", payload)
                 .then(({data}) => {
+                    if(data.loginSuccess){
+                        initUser(data.userId, user.nickname, true);
+                        onShowLogoutButton();
+                    }
+
                     console.log(data);
                 })
                 .catch((err) => {
@@ -96,7 +99,7 @@
             const password = document.querySelector("#register_password").value;
             console.log("login nickname, id ,password >> ", nickname, id, password);
             const payload = { nickname, id, password };
-            console.log(paylaod);
+            console.log("payload >> ", payload);
             axios.post("/api/user/register", payload)
                 .then(({data}) => {
                     console.log(data);
@@ -105,6 +108,25 @@
                     console.error(err);
                 })
         }
+
+        const onSubmitLogout = () => {
+            const payload = { _id : user._id };
+            console.log("payload >> ", payload);
+            axios.get("/api/user/logout", payload)
+                .then(({data}) => {
+                    if(data.success){
+                        onClickLoginButton();
+                        initUser();
+                    } else {
+                        console.log("logout failed...");
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                })
+        }
+
+
 
         const onClickDetailPage = (e) => {
             const target = e.querySelector("#hidden").innerText;
@@ -122,11 +144,22 @@
                 })
         };
 
+        const onShowLogoutButton = () => {
+            login.innerHTML = `
+                            <button type="button" onclick="onSubmitLogout()">로그아웃</button>
+                        `;
+        }
+
+        const initUser = (id = null, nickname = null, isAuth = false) => {
+            user._id = id;
+            user.nickname = nickname;
+            user.isAuth = isAuth;
+        }
+
         const init = () => {
             axios
                 .post("/api/board/getAll")
-                .then((res) => {
-                    const data = res.data;
+                .then(({data}) => {
                     console.log("data >> ", data);
                     let html = "<Table>";
                     data.board.map((v) => {
@@ -144,10 +177,24 @@
                 .catch((err) => {
                     console.error(err);
                 });
+            axios
+                .get("/api/user/auth")
+                .then(({data}) => {
+                    console.log("data >> ", data);
+                    if(data.isAuth){
+                        onShowLogoutButton();
+                    } else {
+                        initUser();
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
         };
 
         init();
 
+        console.log("user >> ", user);
     </script>
 </body>
 </html>
