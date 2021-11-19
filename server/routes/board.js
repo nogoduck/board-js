@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
 const { Board } = require("../models/Board");
+const { getDate } = require("../routes/_utils");
 
 router.post("/delete", (req, res) => {
   const target = req.body;
@@ -27,9 +27,6 @@ router.post("/delete", (req, res) => {
 
 router.post("/update", (req, res) => {
   const target = req.body;
-
-  console.log("target :: ", target);
-
   const filter = { _id: target._id };
   const update = {
     title: target.title,

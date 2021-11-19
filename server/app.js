@@ -7,8 +7,8 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 
-const indexRouter = require("./routes/index");
 const boardRouter = require("./routes/board");
+const userRouter = require("./routes/user");
 
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
@@ -30,8 +30,8 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-app.use("/api", indexRouter);
 app.use("/api/board", boardRouter);
+app.use("/api/user", userRouter);
 
 app.listen(app.get("PORT"), () => {
   console.log("Connected PORT:", app.get("PORT"));
