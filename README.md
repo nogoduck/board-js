@@ -15,5 +15,5 @@ server
 <img width="109" alt="htu" src="https://user-images.githubusercontent.com/72322679/142685028-fcae02e0-9209-4998-8570-10818ef5f5a0.PNG">
 <img width="421" alt="htu2" src="https://user-images.githubusercontent.com/72322679/142685034-d3a1860b-7aff-4fc7-b4fd-333da895e09a.PNG">
 
-
-3. "npm start" 명령어로 서버 시작 후 "localhost:[설정된 포트]"에서 동작 확인
+  
+3. "npm start" 명령어로 서버 시작 후 "localhost:[설정된 포트]"에서 동작을 확인합니다.
