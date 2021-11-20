@@ -4,14 +4,17 @@ const router = express.Router();
 const { Board } = require("../models/Board");
 const { getDate } = require("../routes/_utils");
 
+// ====================================
+//                Board
+// ====================================
 router.post("/delete", (req, res) => {
   const target = req.body;
   console.log("[ Server ] delete target >> ", target);
-  // if (Object.keys(target).length === 0) {
-  //   return res.status(500).json({
-  //     message: "The target to be removed has not been entered",
-  //   });
-  // }
+  if (Object.keys(target).length === 0) {
+    return res.status(500).json({
+      message: "The target to be removed has not been entered",
+    });
+  }
   Board.findOneAndDelete(target, (err, doc) => {
     console.log("[ Server ] delete doc >> ", doc);
     if (err)

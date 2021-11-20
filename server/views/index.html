@@ -26,7 +26,7 @@
     <!-- Board Section -->
     <section id="board">
     </section>
-    <button onclick="onClickBoardWrite()">글쓰기</button>
+    <button onclick="onShowBoardWrite()">글쓰기</button>
     <div id="board-write"></div>
     <!-- End Board Section -->
 
@@ -47,10 +47,10 @@
             location.href = "/";
         });
 
-        ///////////////////////////////////
-        //             게시판
-        ///////////////////////////////////
-        const onClickBoardWrite = () => {
+        // ====================================
+        //                게시판
+        // ====================================
+        const onShowBoardWrite = () => {
             if (!user.isAuth) {
                 alert("로그인된 유저만 글을 작성할 수 있습니다.");
                 return;
@@ -75,38 +75,38 @@
                 .post("/api/board/create", payload)
                 .then(({ data }) => {
                     console.log("write data >> ", data);
-                    // if (data.success) {
+                    if (data.success) {
                         alert("작성글이 성공적으로 등록되었습니다.");
                         onShowBoardList();
-                    // } else {
-                    //     alert("글 등록 실패");
-                    // }
+                    } else {
+                        alert("글 등록 실패");
+                    }
                 })
                 .catch((err) => {
                     console.error(err);
                 });
         };
 
-        const onClickDeletePost = () => {
+        const onSubmitDeletePost = () => {
             axios
                 .post("/api/board/delete", { postId })
                 .then(({ data }) => {
                     console.log("del data >> ", data);
-                    // if (data.success) {
+                    if (data.success) {
                         alert("게시글이 성공적으로 삭제되었습니다.");
-                    // }
+                    }
                     onShowBoardList();
 
                 })
                 .catch((err) => {
                     console.error(err);
-                    // alert("게시글을 삭제하는데 실패했습니다.");
+                    alert("게시글을 삭제하는데 실패했습니다.");
                     onShowBoardList();
 
                 });
         };
 
-        const onClickDetailPage = (e) => {
+        const onShowBoardDetail = (e) => {
             postId = e.querySelector("#hidden").innerText;
             console.log("postId >> ", postId);
             const payload = {
@@ -121,7 +121,7 @@
                         board.innerHTML = `
                             ${data.doc.title} <br/>
                             ${data.doc.description} <br/>
-                            <button type="button" onclick="onClickDeletePost()">삭제하기</button>
+                            <button type="button" onclick="onSubmitDeletePost()">삭제하기</button>
                         `;
                     }
                 })
@@ -142,7 +142,7 @@
                         html = "<Table>";
                         data.board.map((v) => {
                             html += `
-                                    <tr onclick="onClickDetailPage(this)">
+                                    <tr onclick="onShowBoardDetail(this)">
                                         <td id="hidden">${v._id}</td>
                                         <td class="board-title">${v.title}</td>
                                         <td>${v.createdAt}</td>
@@ -158,9 +158,9 @@
                 });
         };
 
-        ///////////////////////////////////
-        //             로그인
-        ///////////////////////////////////
+        // ====================================
+        //                로그인
+        // ====================================
         const onClickLoginButton = () => {
             login.innerHTML = `
              <form>
@@ -274,12 +274,11 @@
         };
 
         //초기화(로그인 상태, 게시판 글 요청)
-        const init = () => {
+        (function init()  {
             getAuth();
-            // onShowBoardList();
-        };
+            onShowBoardList();
+        })();
 
-        init();
     </script>
 </body>
 </html>
